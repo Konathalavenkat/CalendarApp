@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dynamic Calendar</title>
+  <link rel="stylesheet" href="./index.css">
+</head>
+<body>
+  
+  <header class="header">
+    <div class="header__left">
+      <button class="header__left__hamburger" id="hideSideBar">
+        <svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="40" height="40" viewBox="0 0 50 50">
+          <path d="M 0 7.5 L 0 12.5 L 50 12.5 L 50 7.5 Z M 0 22.5 L 0 27.5 L 50 27.5 L 50 22.5 Z M 0 37.5 L 0 42.5 L 50 42.5 L 50 37.5 Z"></path>
+        </svg>
+      </button>
+      <img src="https://ssl.gstatic.com/calendar/images/dynamiclogo_2020q4/calendar_12_2x.png" class="header__left__logo" />
+      <p class="appname">Calendar</p>
+      <button id="Today">Today</button>
+      <button id="prev"> < </button>
+      <button id="next"> > </button>
+      <button id="month-name">February 2025</button>
+    </div>
+    <div class="header__right">
+      <select name="view" id="view-selector" >
+        <option value="day">day</option>
+        <option value="week">week</option>
+        <option value="month">month</option>
+      </select>
+      <label for="switch" class="switch">
+        <input id="switch" type="checkbox" />
+        <span class="slider"></span>
+        <span class="decorator"></span>
+      </label>
+      <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSpbF9MRc872DyqrFDJJ3MRq68r08IaEKCNGzAqYNpeSK38HOao_E2_50CtB2V4TGM_5ag&usqp=CAU" class="profile-pic">
+      
+    </div>
+  </header>
+  <main id="Main">
+    <div id="sidebar">
+      <button id="Add-Event">Add Event</button>
+      <div class="calendar">
+        <div class="calendar-header">
+          <button id="prev-month"> < </button>
+          <div id="month-year"></div>
+          <button id="next-month"> > </button>
+        </div>
+        <div class="calendar-body">
+          <div class="calendar-weekdays">
+                <div>S</div>
+                <div>M</div>
+                <div>T</div>
+                <div>W</div>
+                <div>T</div>
+                <div>F</div>
+                <div>S</div>
+          </div>
+          <div class="calendar-dates">
+            <div></div>
+          </div>
+        </div>
+      </div>
+    </div>  
+    <div class="Right">
+      <div id="Times">
+        <div class="date"></div>
+        <div class="timeslot">00:00</div>
+        <div class="timeslot">00:30</div>
+        <div class="timeslot">01:00</div>
+        <div class="timeslot">01:30</div>
+        <div class="timeslot">02:00</div>
+        <div class="timeslot">02:30</div>
+        <div class="timeslot">03:00</div>
+        <div class="timeslot">03:30</div>
+        <div class="timeslot">04:00</div>
+        <div class="timeslot">04:30</div>
+        <div class="timeslot">05:00</div>
+        <div class="timeslot">05:30</div>
+        <div class="timeslot">06:00</div>
+        <div class="timeslot">06:30</div>
+        <div class="timeslot">07:00</div>
+        <div class="timeslot">07:30</div>
+        <div class="timeslot">08:00</div>
+        <div class="timeslot">08:30</div>
+        <div class="timeslot">09:00</div>
+        <div class="timeslot">09:30</div>
+        <div class="timeslot">10:00</div>
+        <div class="timeslot">10:30</div>
+        <div class="timeslot">11:00</div>
+        <div class="timeslot">11:30</div>
+        <div class="timeslot">12:00</div>
+        <div class="timeslot">12:30</div>
+        <div class="timeslot">13:00</div>
+        <div class="timeslot">13:30</div>
+        <div class="timeslot">14:00</div>
+        <div class="timeslot">14:30</div>
+        <div class="timeslot">15:00</div>
+        <div class="timeslot">15:30</div>
+        <div class="timeslot">16:00</div>
+        <div class="timeslot">16:30</div>
+        <div class="timeslot">17:00</div>
+        <div class="timeslot">17:30</div>
+        <div class="timeslot">18:00</div>
+        <div class="timeslot">18:30</div>
+        <div class="timeslot">19:00</div>
+        <div class="timeslot">19:30</div>
+        <div class="timeslot">20:00</div>
+        <div class="timeslot">20:30</div>
+        <div class="timeslot">21:00</div>
+        <div class="timeslot">21:30</div>
+        <div class="timeslot">22:00</div>
+        <div class="timeslot">22:30</div>
+        <div class="timeslot">23:00</div>
+        <div class="timeslot">23:30</div>
+      </div>
+      <div id="Events">
+  
+      </div>
+    </div>
+  </main>
+
+  <script src="./index.js" type="module"></script>
+</body>
+</html>
