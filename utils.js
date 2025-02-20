@@ -26,3 +26,16 @@ export var create = function(element, properties,attributes) {
 export var pad = (number) => {
     return (''+number).padStart(2,"0");
 }
+
+export var getIndex=(time)=>{
+    return Number(time.substring(0,2))*2 + Number(time.substring(3,5))/30;
+}
+
+export var indexToTime =(index) => {
+    return pad(Math.floor(index/2))+':'+pad(30*(index%2));
+}
+
+export var ddmmyyyyToyyyymmdd = (date) => {
+    const [year,month,d] = [Number(date.substring(6,10)),Number(date.substring(3,5)),Number(date.substring(0,2))]
+    return year+'-'+(''+month).padStart(2,'0')+"-"+(''+d).padStart(2,'0');
+}

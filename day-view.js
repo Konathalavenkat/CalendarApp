@@ -1,19 +1,21 @@
-import {hourgenerator,create,dateformat,pad} from './utils.js';
+import {hourgenerator,create,dateformat,pad,getIndex} from './utils.js';
 
 class Day {
     constructor(date) {
         this.date = new Date(date);
         this.format =  dateformat(this.date)
-        if(!Day.map){
-            Day.map = {};
+        if(!Day.objectMap){
+            Day.objectMap = {};
         }
-        if(!Day.map[this.format]){
-            Day.map[this.format] = this
+        if(!Day.objectMap[this.format]){
+            Day.objectMap[this.format] = this
             this.Events = this.getEventJson();
             this.elements = {};
             this.NoOfEvents = Array(49).fill(0);
+            this.updateNoofEvents();
+            this.rendered = false;
         }
-        return Day.map[this.format];
+        return Day.objectMap[this.format];
     }
     getEventJson(){
         const data = localStorage.getItem(this.format);
@@ -28,18 +30,12 @@ class Day {
         }
         return {}
     }
-    getIndex(time){
-        return Number(time.substring(0,2))*2 + Number(time.substring(3,5))/30;
-    }
-    renderEvents(){
-        for(const hour of hourgenerator()){
-            this.elements[hour].innerHTML = ''
-        }
+    updateNoofEvents(){
         this.NoOfEvents.fill(0);
         const events = [];
         for (const key in this.Events){
-            events.push([1,this.Events[key].starttime,this.Events[key],key])
-            events.push([0,this.Events[key].endtime,this.Events[key],key])
+            events.push([1,this.Events[key].startTime,this.Events[key],key])
+            events.push([0,this.Events[key].endTime,this.Events[key],key])
         }
         events.sort((x,y)=>{
             if(x[1]!=y[1]){
@@ -52,15 +48,35 @@ class Day {
         })
         for(const event of events){
             if(event[0]==0){
-                this.NoOfEvents[this.getIndex(event[1])] -= 1;
+                this.NoOfEvents[getIndex(event[1])] -= 1;
             }
             else{
-                this.NoOfEvents[this.getIndex(event[1])] += 1;
+                this.NoOfEvents[getIndex(event[1])] += 1;
             }
         }
         for(let i = 1;i<49;i++){
             this.NoOfEvents[i]+=this.NoOfEvents[i-1];
         }
+    }
+    renderEvents(){
+        this.updateNoofEvents();
+        for(const hour of hourgenerator()){
+            this.elements[hour].innerHTML = ''
+        }
+        const events = [];
+        for (const key in this.Events){
+            events.push([1,this.Events[key].startTime,this.Events[key],key])
+            events.push([0,this.Events[key].endTime,this.Events[key],key])
+        }
+        events.sort((x,y)=>{
+            if(x[1]!=y[1]){
+                return x[1].localeCompare(y[1]);
+            }
+            if(x[0]!=y[0]){
+                return x[0]-y[0]; 
+            }
+            return 0;
+        })
         const availableevents = [null,null,null,null];
         const slotstaken = {};
         for(const event of events){
@@ -71,8 +87,8 @@ class Day {
             }
             else{
                 let maxevents = 1;
-                const {name,starttime,endtime} = event[2];
-                for(let ind = this.getIndex(starttime);ind<this.getIndex(endtime);ind++){
+                const {name,startTime,endTime} = event[2];
+                for(let ind = getIndex(startTime);ind<getIndex(endTime);ind++){
                     maxevents = Math.max(maxevents,this.NoOfEvents[ind]);
                 }
                 for(let ind = 0;ind<4;ind++){
@@ -86,9 +102,15 @@ class Day {
                 for(let ind=0;ind<4;ind++){
                     if(availableevents[ind]) maxevents = Math.max(maxevents,availableevents[ind]);
                 }
-                const eventitem = create('div',{classList: ["eventitem"],innerHTML: `<p>${name}</p><p>${starttime+'-'+endtime}</p>`});
+                const eventitem = create('div',{classList: ["eventitem"],innerHTML: `<p>${name}</p><p>${startTime+'-'+endTime}</p>`,draggable:true},{id:event[3],name,startTime,endTime,date:this.format});
+                eventitem.addEventListener('dragstart',function(event){
+                    eventitem.classList.add('dragging');
+                })
+                eventitem.addEventListener('dragend',function(event){
+                    eventitem.classList.remove('dragging');
+                })
                 let slots = 0;
-                const [starthour,startminute,endhour,endminute] = [Number(starttime.substring(0,2)),Number(starttime.substring(3,5)),Number(endtime.substring(0,2)),Number(endtime.substring(3,5))]
+                const [starthour,startminute,endhour,endminute] = [Number(startTime.substring(0,2)),Number(startTime.substring(3,5)),Number(endTime.substring(0,2)),Number(endTime.substring(3,5))]
                 slots += (endhour-starthour)*2
                 if(startminute>endminute){
                     slots-=1;
@@ -97,13 +119,13 @@ class Day {
                     slots+=1;
                 }
                 // if(maxevents == 3) maxevents =4;
-                console.log(starttime,endtime,curr,maxevents);
+                console.log(startTime,endTime,curr,maxevents);
                 eventitem.style.height = `${slots*60-12}px`;
                 eventitem.style.left = `${(100/maxevents)*(curr-1)}%`;
-                eventitem.style.width = `calc(${100/maxevents}% - 10px)`;
+                eventitem.style.width = `calc(${100/maxevents}% - 15px)`;
                 eventitem.style.zIndex = curr*5;
                 // console.log(event[1],curr,eventitem.style.height,eventitem.style.left,eventitem.style.width)
-                this.elements[starttime].append(eventitem);
+                this.elements[startTime].append(eventitem);
             }
             
         }
@@ -117,6 +139,7 @@ class Day {
             this.elements[time] = timeitem;
             fragment.append(timeitem);
         }
+        this.rendered = true;
         this.renderEvents();
         return fragment;
         
@@ -124,22 +147,34 @@ class Day {
     getEvents(){
         return this.Events;
     }
-    addEvent(name,starttime,endtime){
-        for(let ind=this.getIndex(starttime);ind<this.getIndex(endtime);ind++){
+    addEvent(name,startTime,endTime){
+        for(let ind=getIndex(startTime);ind<getIndex(endTime);ind++){
             if(this.NoOfEvents[ind]>=4){
                 alert("More than 4 Events are Conflicting.")
                 return;
             }
         }
-        this.Events[Date.now()]= {name,starttime,endtime}; 
+        for(let ind=getIndex(startTime);ind<getIndex(endTime);ind++){
+            this.NoOfEvents[ind]+=1;
+        }
+        this.Events[Date.now()]= {name,startTime,endTime}; 
         localStorage.setItem(this.format,JSON.stringify(this.Events));
-        this.renderEvents();
+        if(this.rendered) this.renderEvents();
     }
     scrolltoview(hour,minute){
-        
         minute=Math.floor(minute/30) * 30;
         console.log(pad(hour)+":"+pad(minute));
         this.elements[pad(hour)+':'+pad(minute)].scrollIntoView({block: 'center'});
+    }
+    deleteEvent(eventid){
+        delete this.Events[eventid];
+        localStorage.setItem(this.format,JSON.stringify(this.Events));
+        if(this.rendered) this.renderEvents();
+    }
+    editEvent(newName,newDate,newStartTime,newEndTime,eventid){
+        this.deleteEvent(eventid);
+        const EventDate = new Day(newDate);
+        EventDate.addEvent(newName,newStartTime,newEndTime);
     }
 
 }

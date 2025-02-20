@@ -1,5 +1,5 @@
 import Day from "./day-view.js";
-import {hourgenerator,create} from './utils.js';
+import {hourgenerator,create,dateformat,getIndex,indexToTime,ddmmyyyyToyyyymmdd} from './utils.js';
 import Week from "./week-view.js";
 const calendarDates = document.querySelector('.calendar-dates');
 const monthYear = document.getElementById('month-year');
@@ -9,7 +9,6 @@ const sideBar = document.getElementById('sidebar');
 const AddEvent = document.getElementById('Add-Event');
 const ViewSelector = document.getElementById('view-selector');
 const Events = document.getElementById('Events');
-
 
 let selectedDate = new Date();
 let currentDate = new Date();
@@ -78,7 +77,7 @@ function hideSideBar(){
   }
 }
 
-function createPopUp(name,date,time){
+function createPopUp(name,date,startTime,endTime,option,id){
   const container = create('div',{classList: ['popup-container']});
   const popupelement = create('div',{classList: ['popup']});
   const label_eventnameinput = create('label',{for: "popupinput",innerHTML: "Enter Event Name<br>"});
@@ -90,37 +89,39 @@ function createPopUp(name,date,time){
   const dateinput = create('input',{type: 'date', name:"inputdate", id: "inputdate"});
   if(date){
     const [year,month,d] = [Number(date.substring(6,10)),Number(date.substring(3,5)),Number(date.substring(0,2))]
-    const formatteddate = year+'-'+(''+month).padStart(2,'0')+"-"+(''+d).padStart(2,'0');
-    dateinput.value = formatteddate;
+    const formattedDate = year+'-'+(''+month).padStart(2,'0')+"-"+(''+d).padStart(2,'0');
+    dateinput.value = formattedDate;
   }
   console.log(dateinput.value)
-  const label_starttimeinput = create('label',{for: "inputtime",innerHTML: "Enter Time of the Event<br>"});
-  const starttimeinput = create('select',{name:"inputtime",id:"inputtime"});
-  starttimeinput.innerHTML += '<option value=""> --Select Time-- </option>'
+  const label_startTimeinput = create('label',{for: "inputtime",innerHTML: "Enter Time of the Event<br>"});
+  const startTimeinput = create('select',{name:"inputtime",id:"inputtime"});
+  startTimeinput.innerHTML += '<option value=""> --Select Time-- </option>'
   for(const time of hourgenerator()){
-    starttimeinput.innerHTML += `<option value="${time}"> ${time} </option>`;
+    startTimeinput.innerHTML += `<option value="${time}"> ${time} </option>`;
   }
-  if(time){
-    starttimeinput.value = time;
+  if(startTime){
+    startTimeinput.value = startTime;
   }
-  const label_endtimeinput = create('label',{for: "endtimeinput",innerHTML: "Enter End Time of the Event<br>"});
-  const endtimeinput = create('select',{name:"endtimeinput",id:"endtimeinput"});
-  endtimeinput.innerHTML += '<option value=""> --Select Time-- </option>'
+  const label_endTimeinput = create('label',{for: "endTimeinput",innerHTML: "Enter End Time of the Event<br>"});
+  const endTimeinput = create('select',{name:"endTimeinput",id:"endTimeinput"});
+  endTimeinput.innerHTML += '<option value=""> --Select Time-- </option>'
   for(const time of hourgenerator()){
-    endtimeinput.innerHTML += `<option value="${time}"> ${time} </option>`;
+    endTimeinput.innerHTML += `<option value="${time}"> ${time} </option>`;
+  }
+  if(endTime){
+    endTimeinput.value = endTime;
   }
   const submit = create('button',{innerHTML: 'submit'});
   const exit = create('div',{innerText:"X",classList:["popup-cross"]});
-
 
   popupelement.appendChild(label_eventnameinput);
   popupelement.appendChild(eventnameinput);
   popupelement.appendChild(label_dateinput);
   popupelement.appendChild(dateinput);
-  popupelement.appendChild(label_starttimeinput);
-  popupelement.appendChild(starttimeinput);
-  popupelement.appendChild(label_endtimeinput);
-  popupelement.appendChild(endtimeinput);
+  popupelement.appendChild(label_startTimeinput);
+  popupelement.appendChild(startTimeinput);
+  popupelement.appendChild(label_endTimeinput);
+  popupelement.appendChild(endTimeinput);
   popupelement.appendChild(submit);
   popupelement.appendChild(exit);
   container.append(popupelement)
@@ -138,32 +139,71 @@ function createPopUp(name,date,time){
     event.preventDefault();
     const eventname = eventnameinput.value;
     
-    const date = dateinput.value;
+    const inputdate = dateinput.value;
     
-    const time = starttimeinput.value;
+    const time = startTimeinput.value;
     
-    const endtime = endtimeinput.value;
+    const endTime = endTimeinput.value;
 
-    if(!eventname.trim() || !date || !time || !endtime){
+    if(!eventname.trim() || !inputdate || !time || !endTime){
       alert("Please Fill all fields");
       return;
     }
 
-    console.log(time.localeCompare(endtime));
-    if(time.localeCompare(endtime) >= 0){
+    console.log(time.localeCompare(endTime));
+    if(time.localeCompare(endTime) >= 0){
       alert("Start Time cannot be after End Time");
       return;
     }
 
-    const DayObject = new Day(date);
-    DayObject.addEvent(eventname,time,endtime);
+    if(option =='add'){
+      const DayObject = new Day(inputdate);
+      DayObject.addEvent(eventname,time,endTime);
+    }
+    else{
+      // console.log();
+      const PrevDayObject = new Day(ddmmyyyyToyyyymmdd(date));
+      PrevDayObject.editEvent(eventname,inputdate,time,endTime,id);
+    }
     removeElement(container);
   })
 }
 
 Events.addEventListener('click',function(event){
+  console.log(event.target.className,event.target.parentElement.className);
   if(event.target.className === 'halfhour'){
-    createPopUp('',event.target.getAttribute('date'),event.target.getAttribute('time'));
+    createPopUp('',event.target.getAttribute('date'),event.target.getAttribute('time'),'','add');
+  }
+  else if(event.target.className === 'eventitem' || event.target.parentElement.className ==='eventitem'){
+    let ele = event.target;
+    if(event.target.parentElement.className === 'eventitem')
+      ele = event.target.parentElement;
+    const getter = (name) => ele.getAttribute(name);
+    createPopUp(getter('name'),getter('date'),getter('startTime'),getter('endTime'),'edit',getter('id'));
+
+  }
+})
+
+Events.addEventListener('dragover',function(event){
+  event.preventDefault();
+})
+
+Events.addEventListener('drop',function(event){
+  if(event.target.className === 'halfhour'){
+    const ele = document.querySelector('.dragging');
+    const [newDate,newStartTime] = [event.target.getAttribute('date'),event.target.getAttribute('time')];
+    const get = (text) => ele.getAttribute(text); 
+    const [eventName,eventDate,eventStartTime,eventEndTime,eventId] = [get('name'),get('date'),get('starttime'),get('endtime'),get('id')];
+    const endTimeIndex = getIndex(newStartTime) + (getIndex(eventEndTime)-getIndex(eventStartTime));
+    if(endTimeIndex >=48){
+      alert('Multi Day Events are still in development');
+      return;
+    }
+    else{
+      const newEndTime = indexToTime(endTimeIndex);
+      const eventDayObject = new Day(ddmmyyyyToyyyymmdd(eventDate));
+      eventDayObject.editEvent(eventName,ddmmyyyyToyyyymmdd(newDate),newStartTime,newEndTime,eventId);
+    }
   }
 })
 
