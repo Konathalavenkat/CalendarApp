@@ -1,6 +1,7 @@
 import Day from "./day-view.js";
-import {hourgenerator,create,dateformat,getIndex,indexToTime,ddmmyyyyToyyyymmdd} from './utils.js';
+import {hourgenerator,create,getIndex,indexToTime,ddmmyyyyToyyyymmdd} from './utils.js';
 import Week from "./week-view.js";
+
 const calendarDates = document.querySelector('.calendar-dates');
 const monthYear = document.getElementById('month-year');
 const prevMonthBtn = document.getElementById('prev-month');
@@ -92,7 +93,6 @@ function createPopUp(name,date,startTime,endTime,option,id){
     const formattedDate = year+'-'+(''+month).padStart(2,'0')+"-"+(''+d).padStart(2,'0');
     dateinput.value = formattedDate;
   }
-  console.log(dateinput.value)
   const label_startTimeinput = create('label',{for: "inputtime",innerHTML: "Enter Time of the Event<br>"});
   const startTimeinput = create('select',{name:"inputtime",id:"inputtime"});
   startTimeinput.innerHTML += '<option value=""> --Select Time-- </option>'
@@ -150,7 +150,6 @@ function createPopUp(name,date,startTime,endTime,option,id){
       return;
     }
 
-    console.log(time.localeCompare(endTime));
     if(time.localeCompare(endTime) >= 0){
       alert("Start Time cannot be after End Time");
       return;
@@ -161,7 +160,6 @@ function createPopUp(name,date,startTime,endTime,option,id){
       DayObject.addEvent(eventname,time,endTime);
     }
     else{
-      // console.log();
       const PrevDayObject = new Day(ddmmyyyyToyyyymmdd(date));
       PrevDayObject.editEvent(eventname,inputdate,time,endTime,id);
     }
@@ -170,7 +168,6 @@ function createPopUp(name,date,startTime,endTime,option,id){
 }
 
 Events.addEventListener('click',function(event){
-  console.log(event.target.className,event.target.parentElement.className);
   if(event.target.className === 'halfhour'){
     createPopUp('',event.target.getAttribute('date'),event.target.getAttribute('time'),'','add');
   }
@@ -189,21 +186,29 @@ Events.addEventListener('dragover',function(event){
 })
 
 Events.addEventListener('drop',function(event){
+  let timeslotItem;
   if(event.target.className === 'halfhour'){
-    const ele = document.querySelector('.dragging');
-    const [newDate,newStartTime] = [event.target.getAttribute('date'),event.target.getAttribute('time')];
-    const get = (text) => ele.getAttribute(text); 
-    const [eventName,eventDate,eventStartTime,eventEndTime,eventId] = [get('name'),get('date'),get('starttime'),get('endtime'),get('id')];
-    const endTimeIndex = getIndex(newStartTime) + (getIndex(eventEndTime)-getIndex(eventStartTime));
-    if(endTimeIndex >=48){
-      alert('Multi Day Events are still in development');
-      return;
-    }
-    else{
-      const newEndTime = indexToTime(endTimeIndex);
-      const eventDayObject = new Day(ddmmyyyyToyyyymmdd(eventDate));
-      eventDayObject.editEvent(eventName,ddmmyyyyToyyyymmdd(newDate),newStartTime,newEndTime,eventId);
-    }
+    timeslotItem = event.target;
+  }
+  else if(event.target.className === 'eventitem'){
+    timeslotItem = event.target.parentElement;
+  }
+  else if(event.target.parentElement.className ==='eventitem'){
+    timeslotItem = event.target.parentElement.parentElement;
+  }
+  const ele = document.querySelector('.dragging');
+  const [newDate,newStartTime] = [timeslotItem.getAttribute('date'),timeslotItem.getAttribute('time')];
+  const get = (text) => ele.getAttribute(text); 
+  const [eventName,eventDate,eventStartTime,eventEndTime,eventId] = [get('name'),get('date'),get('starttime'),get('endtime'),get('id')];
+  const endTimeIndex = getIndex(newStartTime) + (getIndex(eventEndTime)-getIndex(eventStartTime));
+  if(endTimeIndex >=48){
+    alert('Multi Day Events are still in development');
+    return;
+  }
+  else{
+    const newEndTime = indexToTime(endTimeIndex);
+    const eventDayObject = new Day(ddmmyyyyToyyyymmdd(eventDate));
+    eventDayObject.editEvent(eventName,ddmmyyyyToyyyymmdd(newDate),newStartTime,newEndTime,eventId);
   }
 })
 
@@ -246,7 +251,7 @@ function removeElement(ele){
 }
 
 AddEvent.addEventListener('click',function(event){
-  createPopUp();
+  createPopUp('','','','','add');
 });
 
 function Render(){

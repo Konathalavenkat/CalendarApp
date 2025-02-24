@@ -55,6 +55,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    position: sticky;
   }
 
   .header__left{
@@ -267,6 +268,10 @@ input:checked + .slider:before {
   overflow: scroll;
   border-left: 3px solid #8cbff9;
 
+}
+
+.eventitem::-webkit-scrollbar{
+  display: none;
 }
 
 .eventitem:hover{

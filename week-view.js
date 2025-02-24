@@ -16,6 +16,8 @@ class Week{
             maincontainer.appendChild(container)
             this.date.setDate(this.date.getDate()+1)
         }
+        this.date.setDate(this.date.getDate()-1);
+        new Day(this.date).scrolltoview(new Date().getHours(),new Date().getMinutes());
         weekview.append(maincontainer);
         return weekview;
     }

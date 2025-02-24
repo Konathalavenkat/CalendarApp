@@ -24,7 +24,6 @@ class Day {
                 return JSON.parse(data);
             }
             catch(e){
-                console.log(e);
                 return {}
             }
         }
@@ -81,7 +80,6 @@ class Day {
         const slotstaken = {};
         for(const event of events){
             let curr = 0;
-            console.log(event[0],event[1],availableevents);
             if(event[0] === 0){
                 availableevents[slotstaken[event[3]]] = null;
             }
@@ -118,13 +116,10 @@ class Day {
                 else if(endminute>startminute){
                     slots+=1;
                 }
-                // if(maxevents == 3) maxevents =4;
-                console.log(startTime,endTime,curr,maxevents);
                 eventitem.style.height = `${slots*60-12}px`;
                 eventitem.style.left = `${(100/maxevents)*(curr-1)}%`;
                 eventitem.style.width = `calc(${100/maxevents}% - 15px)`;
                 eventitem.style.zIndex = curr*5;
-                // console.log(event[1],curr,eventitem.style.height,eventitem.style.left,eventitem.style.width)
                 this.elements[startTime].append(eventitem);
             }
             
@@ -151,7 +146,7 @@ class Day {
         for(let ind=getIndex(startTime);ind<getIndex(endTime);ind++){
             if(this.NoOfEvents[ind]>=4){
                 alert("More than 4 Events are Conflicting.")
-                return;
+                return false;
             }
         }
         for(let ind=getIndex(startTime);ind<getIndex(endTime);ind++){
@@ -160,10 +155,10 @@ class Day {
         this.Events[Date.now()]= {name,startTime,endTime}; 
         localStorage.setItem(this.format,JSON.stringify(this.Events));
         if(this.rendered) this.renderEvents();
+        return true;
     }
     scrolltoview(hour,minute){
         minute=Math.floor(minute/30) * 30;
-        console.log(pad(hour)+":"+pad(minute));
         this.elements[pad(hour)+':'+pad(minute)].scrollIntoView({block: 'center'});
     }
     deleteEvent(eventid){
@@ -172,9 +167,9 @@ class Day {
         if(this.rendered) this.renderEvents();
     }
     editEvent(newName,newDate,newStartTime,newEndTime,eventid){
-        this.deleteEvent(eventid);
         const EventDate = new Day(newDate);
-        EventDate.addEvent(newName,newStartTime,newEndTime);
+        const response = EventDate.addEvent(newName,newStartTime,newEndTime);
+        if(response) this.deleteEvent(eventid);
     }
 
 }
