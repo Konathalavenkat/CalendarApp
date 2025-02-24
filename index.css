@@ -385,3 +385,44 @@ input:checked + .slider:before {
   justify-content: center;
   align-items: center;
 }
+
+#Events h1{
+  text-align: center;
+}
+
+.monthview{
+  display: grid;
+  grid-template-columns: repeat(7,1fr);
+}
+.monthview__dayitem{
+  height: 150px;
+  width: 100%;
+  border: 1px solid var(--inv);
+  border-radius: 12px;
+  padding: 10px;
+  margin: 5px;
+  box-sizing: border-box;
+  overflow: scroll;
+  min-width: 150px;
+}
+
+.monthview__dayitem--today{
+  border-color: var(--bg);
+  background-color: var(--inv);
+  color: var(--bg);
+}
+
+.dayheading{
+  text-align: center;
+}
+
+.month_day_item {
+  background-color: #5494de;
+  border-radius: 6px;
+  padding-left: 3px;
+  margin: 5px 0px;
+}
+
+.month_day_item::-webkit-scrollbar{
+  display: none;
+}

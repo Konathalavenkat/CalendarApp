@@ -1,6 +1,7 @@
 import Day from "./day-view.js";
-import {hourgenerator,create,getIndex,indexToTime,ddmmyyyyToyyyymmdd} from './utils.js';
+import {hourgenerator,create,getIndex,indexToTime,ddmmyyyyToyyyymmdd,months} from './utils.js';
 import Week from "./week-view.js";
+import Month from "./monthView.js";
 
 const calendarDates = document.querySelector('.calendar-dates');
 const monthYear = document.getElementById('month-year');
@@ -16,10 +17,7 @@ let currentDate = new Date();
 let currentMonth = currentDate.getMonth();
 let currentYear = currentDate.getFullYear();
 
-const months = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'
-];
+
 
 document.getElementById('hideSideBar').addEventListener('click',hideSideBar);
 
@@ -229,7 +227,8 @@ document.getElementById('switch').addEventListener('change',function(event){
   }
 })
 
-function DayView(date){
+export function DayView(date){
+  document.getElementById('Times').style.display = 'block';
   const View = new Day(date);
   document.getElementById('Events').innerHTML = '';
   document.getElementById('Events').append(View.render());
@@ -237,9 +236,17 @@ function DayView(date){
 }
 
 function WeekView(date){
+  document.getElementById('Times').style.display = 'block';
   const weekView = new Week(date);
   document.getElementById('Events').innerHTML = '';
   document.getElementById('Events').append(weekView.render());
+}
+
+function MonthView(date){
+  document.getElementById('Times').style.display = 'none';
+  const monthView = new Month(date);
+  document.getElementById('Events').innerHTML = '';
+  document.getElementById('Events').append(monthView.render());
 }
 
 function addElement(ele){
@@ -248,6 +255,9 @@ function addElement(ele){
 
 function removeElement(ele){
   document.body.removeChild(ele);
+  if(ViewSelector.value === 'month'){
+    MonthView(selectedDate);
+  }
 }
 
 AddEvent.addEventListener('click',function(event){
@@ -260,6 +270,9 @@ function Render(){
   }
   else if(ViewSelector.value == 'week'){
     WeekView(selectedDate);
+  }
+  else{
+    MonthView(selectedDate);
   }
 }
 

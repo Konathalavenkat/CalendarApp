@@ -39,3 +39,8 @@ export var ddmmyyyyToyyyymmdd = (date) => {
     const [year,month,d] = [Number(date.substring(6,10)),Number(date.substring(3,5)),Number(date.substring(0,2))]
     return year+'-'+(''+month).padStart(2,'0')+"-"+(''+d).padStart(2,'0');
 }
+
+export const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
